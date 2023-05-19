@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConnectMe - Социальная сеть</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h2>ABLORealnost</h2>
+    <nav>
+      <ul>
+        <li><a href="index.html">Главная</a></li>
+        <li><a href="profile.html">Профиль</a></li>
+        <li><a href="#">Сообщения</a></li>
+        <li><a href="#">Настройки</a></li>
+        <li><a href="#">Выход</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="messages">
+      <h1>Сообщения</h1>
+      <ul class="user-list">
+        <li><a href="#">Пользователь 1</a></li>
+        <li><a href="#">Пользователь 2</a></li>
+        <li><a href="#">Пользователь 3</a></li>
+      </ul>
+
+      <div class="message-box">
+        <h2>Диалог с Пользователем 1</h2>
+        <ul class="message-list" id="messageList">
+          <!-- Здесь будут отображаться сообщения -->
+        </ul>
+
+        <form class="message-form" id="messageForm">
+          <input type="text" name="message" placeholder="Напишите сообщение..." required>
+          <button type="submit">Отправить</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; ABLORealnost. Все права защищены.</p>
+  </footer>
+
+  <script>
+    // Загрузка сохраненных сообщений при загрузке страницы
+    window.addEventListener("load", function() {
+      var savedMessages = localStorage.getItem("messages");
+      if (savedMessages) {
+        var messageList = document.getElementById("messageList");
+        messageList.innerHTML = savedMessages;
+
+        // Добавление обработчиков событий для кнопок удаления сообщений
+        var deleteButtons = document.querySelectorAll(".message-list li button");
+        deleteButtons.forEach(function(button) {
+          button.addEventListener("click", deleteMessage);
+        });
+      }
+    });
+
+    // Обработка отправки сообщения
+    document.getElementById("messageForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      // Получение значения поля ввода сообщения
+      var messageInput = document.querySelector("input[name='message']");
+      var message = messageInput.value;
+
+      // Создание нового элемента списка сообщений
+      var newMessage = document.createElement("li");
+      newMessage.innerHTML = "<strong>Вы:</strong> " + message;
+
+      // Добавление кнопки удаления к новому сообщению
+      var deleteButton = document.createElement("button");
+      deleteButton.textContent = "Удалить";
+      newMessage.appendChild(deleteButton);
+
+      // Добавление нового сообщения в список сообщений
+      var messageList = document.getElementById("messageList");
+      messageList.appendChild(newMessage);
+
+      // Сохранение сообщений в локальное хранилище
+      localStorage.setItem("messages", messageList.innerHTML);
+
+      // Добавление обработчика события для кнопки удаления нового сообщения
+      deleteButton.addEventListener("click", deleteMessage);
+
+      // Очистка поля ввода сообщения
+      messageInput.value = "";
+    });
+
+    // Функция удаления сообщения
+    function deleteMessage(event) {
+      var messageItem = event.target.parentNode;
+      var messageList = messageItem.parentNode;
+      messageList.removeChild(messageItem);
+
+      // Сохранение обновленных сообщений в локальное хранилище
+      localStorage.setItem("messages", messageList.innerHTML);
+    }
+  </script>
+</body>
+</html>

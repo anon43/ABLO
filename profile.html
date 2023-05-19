@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConnectMe - Социальная сеть</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h2>ABLORealnost</h2>
+    <nav>
+      <ul>
+        <li><a href="index.html">Главная</a></li>
+        <li><a href="#">Профиль</a></li>
+        <li><a href="massege.html">Сообщения</a></li>
+        <li><a href="#">Настройки</a></li>
+        <li><a href="#">Выход</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="profile">
+      <img id="profileImage" src="profile-pic.jpg" alt="Профиль пользователя">
+      <h1 id="username">Имя пользователя</h1>
+      <p id="description">Описание пользователя...</p>
+      <ul class="user-info">
+        <li><strong>Имя:</strong> <span id="name">Имя пользователя</span></li>
+        <li><strong>Email:</strong> <span id="email">example@example.com</span></li>
+        <li><strong>Город:</strong> <span id="city">Москва</span></li>
+        <li><strong>Страна:</strong> <span id="country">Россия</span></li>
+      </ul>
+
+      <div class="edit-profile">
+        <h2>Редактировать профиль</h2>
+        <form id="profileForm">
+          <label for="profilePic">Фото:</label>
+          <input type="file" id="profilePic" accept="image/*">
+          <label for="nameInput">Имя:</label>
+          <input type="text" id="nameInput" required>
+          <label for="emailInput">Email:</label>
+          <input type="email" id="emailInput" required>
+          <label for="cityInput">Город:</label>
+          <input type="text" id="cityInput">
+          <label for="countryInput">Страна:</label>
+          <input type="text" id="countryInput">
+          <label for="descriptionInput">Описание:</label>
+          <textarea id="descriptionInput"></textarea>
+          <button type="submit">Сохранить</button>
+        </form>
+      </div>
+      <div class="gallery">
+        <h2>Галерея фотографий</h2>
+        <form id="galleryForm">
+          <label for="photoInput">Добавить фото:</label>
+          <input type="file" id="photoInput" accept="image/*">
+          <button type="submit">Добавить</button>
+        </form>
+        <ul id="photoList"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2023 ABLORealnost. Все права защищены.</p>
+  </footer>
+
+  <script>
+    // Загрузка сохраненных данных профиля при загрузке страницы
+    window.addEventListener("load", function() {
+      var profileData = JSON.parse(localStorage.getItem("profileData"));
+      if (profileData) {
+        document.getElementById("profileImage").src = profileData.profilePic;
+        document.getElementById("username").textContent = profileData.name;
+        document.getElementById("name").textContent = profileData.name;
+        document.getElementById("email").textContent = profileData.email;
+        document.getElementById("city").textContent = profileData.city;
+        document.getElementById("country").textContent = profileData.country;
+        document.getElementById("description").textContent = profileData.description;
+      }
+    });
+
+    // Обработчик события отправки формы
+    document.getElementById("profileForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      // Получение значений полей формы
+      var profilePic = document.getElementById("profilePic").value;
+      var name = document.getElementById("nameInput").value;
+      var email = document.getElementById("emailInput").value;
+      var city = document.getElementById("cityInput").value;
+      var country = document.getElementById("countryInput").value;
+      var description = document.getElementById("descriptionInput").value;
+
+      // Обновление данных профиля на странице
+      document.getElementById("profileImage").src = profilePic;
+      document.getElementById("username").textContent = name;
+      document.getElementById("name").textContent = name;
+      document.getElementById("email").textContent = email;
+      document.getElementById("city").textContent = city;
+      document.getElementById("country").textContent = country;
+      document.getElementById("description").textContent = description;
+
+      // Сохранение данных профиля в локальное хранилище
+      var profileData = {
+        profilePic: profilePic,
+        name: name,
+        email: email,
+        city: city,
+        country: country,
+        description: description
+      };
+      localStorage.setItem("profileData", JSON.stringify(profileData));
+    });
+    // Загрузка сохраненных фотографий в галерею при загрузке страницы
+window.addEventListener("load", function() {
+  var photoData = JSON.parse(localStorage.getItem("photoData"));
+  if (photoData) {
+    var photoList = document.getElementById("photoList");
+    photoData.forEach(function(photoUrl) {
+      var listItem = document.createElement("li");
+      var img = document.createElement("img");
+      img.src = photoUrl;
+      listItem.appendChild(img);
+      photoList.appendChild(listItem);
+    });
+  }
+});
+
+// Обработчик события отправки формы добавления фото
+document.getElementById("galleryForm").addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  var photoInput = document.getElementById("photoInput");
+  var photoFile = photoInput.files[0];
+
+  if (!photoFile) {
+    alert("Пожалуйста, выберите фото.");
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function() {
+    var photoUrl = reader.result;
+
+    var photoData = JSON.parse(localStorage.getItem("photoData")) || [];
+    photoData.push(photoUrl);
+    localStorage.setItem("photoData", JSON.stringify(photoData));
+
+    var photoList = document.getElementById("photoList");
+    var listItem = document.createElement("li");
+    var img = document.createElement("img");
+    img.src = photoUrl;
+    listItem.appendChild(img);
+    photoList.appendChild(listItem);
+
+    photoInput.value = "";
+  };
+  reader.readAsDataURL(photoFile);
+});
+// Загрузка сохраненных фотографий в галерею при загрузке страницы
+window.addEventListener("load", function() {
+  var photoData = JSON.parse(localStorage.getItem("photoData"));
+  if (photoData) {
+    var photoList = document.getElementById("photoList");
+    photoData.forEach(function(photoUrl, index) {
+      var listItem = createPhotoListItem(photoUrl, index);
+      photoList.appendChild(listItem);
+    });
+  }
+});
+
+// Обработчик события отправки формы добавления фото
+document.getElementById("galleryForm").addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  var photoInput = document.getElementById("photoInput");
+  var photoFile = photoInput.files[0];
+
+  if (!photoFile) {
+    alert("Пожалуйста, выберите фото.");
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function() {
+    var photoUrl = reader.result;
+
+    var photoData = JSON.parse(localStorage.getItem("photoData")) || [];
+    photoData.push(photoUrl);
+    localStorage.setItem("photoData", JSON.stringify(photoData));
+
+    var photoList = document.getElementById("photoList");
+    var listItem = createPhotoListItem(photoUrl, photoData.length - 1);
+    photoList.appendChild(listItem);
+
+    photoInput.value = "";
+  };
+  reader.readAsDataURL(photoFile);
+});
+
+// Функция для создания элемента списка с фотографией
+function createPhotoListItem(photoUrl, index) {
+  var listItem = document.createElement("li");
+  var img = document.createElement("img");
+  img.src = photoUrl;
+  listItem.appendChild(img);
+
+  var deleteButton = document.createElement("button");
+  deleteButton.textContent = "Удалить";
+  deleteButton.addEventListener("click", function() {
+    deletePhoto(index);
+    listItem.remove();
+  });
+  listItem.appendChild(deleteButton);
+
+  return listItem;
+}
+
+// Функция для удаления фотографии из сохраненных данных
+function deletePhoto(index) {
+  var photoData = JSON.parse(localStorage.getItem("photoData"));
+  if (photoData && index >= 0 && index < photoData.length) {
+    photoData.splice(index, 1);
+    localStorage.setItem("photoData", JSON.stringify(photoData));
+  }
+}
+
+  </script>
+</body>
+</html>

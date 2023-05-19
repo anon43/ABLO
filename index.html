@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConnectMe - Социальная сеть</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h2>ABLORealnost</h2>
+    <nav>
+      <ul>
+        <li><a href="#">Главная</a></li>
+        <li><a href="profile.html">Профиль</a></li>
+        <li><a href="massege.html">Сообщения</a></li>
+        <li><a href="#">Настройки</a></li>
+        <li><a href="#">Выход</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="post-form">
+      <h1>Новый пост</h1>
+      <form id="postForm">
+        <input type="file" name="photo" accept="image/*" required>
+        <textarea name="caption" placeholder="Введите текст" required></textarea>
+        <button type="submit">Опубликовать</button>
+      </form>
+    </section>
+
+    <section class="posts">
+      <h1>Посты</h1>
+      <div id="postList"></div>
+    </section>
+  </main>
+
+
+  <footer>
+    <p>&copy; 2023 ABLORealnost. Все права защищены.</p>
+  </footer>
+
+  <script>
+    // Функция для сохранения данных в локальном хранилище
+    function saveData(data) {
+      localStorage.setItem("connectme_data", JSON.stringify(data));
+    }
+
+    // Функция для загрузки данных из локального хранилища
+    function loadData() {
+      var data = localStorage.getItem("connectme_data");
+      return data ? JSON.parse(data) : [];
+    }
+
+    // Функция для отображения сохраненных постов и комментариев
+    function displayData() {
+      var savedData = loadData();
+
+      var postList = document.getElementById("postList");
+      postList.innerHTML = "";
+
+      savedData.forEach(function(item) {
+        var postContainer = document.createElement("div");
+        postContainer.className = "post";
+
+        var imageElement = document.createElement("img");
+        imageElement.src = item.photo;
+
+        var captionElement = document.createElement("p");
+        captionElement.textContent = item.caption;
+
+        var commentList = document.createElement("ul");
+        commentList.id = "commentList-" + item.id;
+
+        item.comments.forEach(function(comment) {
+          var commentItem = document.createElement("li");
+          commentItem.textContent = comment.name + ": " + comment.comment;
+
+          var deleteCommentButton = document.createElement("button");
+          deleteCommentButton.textContent = "Удалить комментарий";
+          deleteCommentButton.addEventListener("click", function() {
+            deleteComment(item.id, comment.id);
+          });
+
+          commentItem.appendChild(deleteCommentButton);
+          commentList.appendChild(commentItem);
+        });
+
+        var commentForm = document.createElement("form");
+        commentForm.id = "commentForm-" + item.id;
+        var commentInput = document.createElement("input");
+        commentInput.type = "text";
+        commentInput.placeholder = "Оставьте комментарий";
+        var nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.placeholder = "Введите имя";
+        var commentButton = document.createElement("button");
+        commentButton.textContent = "Отправить";
+
+        commentForm.appendChild(commentInput);
+        commentForm.appendChild(nameInput);
+        commentForm.appendChild(commentButton);
+
+        commentForm.addEventListener("submit", function(event) {
+          event.preventDefault();
+
+          var comment = commentInput.value;
+          var name = nameInput.value;
+
+          if (!comment || !name) {
+            alert("Пожалуйста, заполните все поля.");
+            return;
+          }
+
+          var savedData = loadData();
+          savedData.forEach(function(savedItem) {
+            if (savedItem.id === item.id) {
+              savedItem.comments.push({ id: savedItem.comments.length + 1, name: name, comment: comment });
+            }
+          });
+
+          saveData(savedData);
+
+          var commentItem = document.createElement("li");
+          commentItem.textContent = name + ": " + comment;
+
+          var deleteCommentButton = document.createElement("button");
+          deleteCommentButton.textContent = "Удалить комментарий";
+          deleteCommentButton.addEventListener("click", function() {
+            deleteComment(item.id, savedItem.comments.length);
+          });
+
+          commentItem.appendChild(deleteCommentButton);
+          commentList.appendChild(commentItem);
+
+          commentInput.value = "";
+          nameInput.value = "";
+        });
+
+        postContainer.appendChild(imageElement);
+        postContainer.appendChild(captionElement);
+        postContainer.appendChild(commentList);
+        postContainer.appendChild(commentForm);
+
+        var deletePostButton = document.createElement("button");
+        deletePostButton.textContent = "Удалить пост";
+        deletePostButton.addEventListener("click", function() {
+          deletePost(item.id);
+        });
+
+        postContainer.appendChild(deletePostButton);
+
+        postList.appendChild(postContainer);
+      });
+    }
+
+    // Функция для удаления комментария
+    function deleteComment(postId, commentId) {
+      var savedData = loadData();
+      savedData.forEach(function(item) {
+        if (item.id === postId) {
+          item.comments = item.comments.filter(function(comment) {
+            return comment.id !== commentId;
+          });
+        }
+      });
+      saveData(savedData);
+
+      var commentList = document.getElementById("commentList-" + postId);
+      commentList.innerHTML = "";
+
+      savedData.forEach(function(item) {
+        if (item.id === postId) {
+          item.comments.forEach(function(comment) {
+            var commentItem = document.createElement("li");
+            commentItem.textContent = comment.name + ": " + comment.comment;
+
+            var deleteCommentButton = document.createElement("button");
+            deleteCommentButton.textContent = "Удалить комментарий";
+            deleteCommentButton.addEventListener("click", function() {
+              deleteComment(item.id, comment.id);
+            });
+
+            commentItem.appendChild(deleteCommentButton);
+            commentList.appendChild(commentItem);
+          });
+        }
+      });
+    }
+
+    // Функция для удаления поста
+    function deletePost(postId) {
+      var savedData = loadData();
+      savedData = savedData.filter(function(item) {
+        return item.id !== postId;
+      });
+      saveData(savedData);
+
+      var postList = document.getElementById("postList");
+      postList.innerHTML = "";
+      displayData();
+    }
+
+    // Функция для генерации уникального идентификатора
+    function generateId() {
+      return Date.now();
+    }
+
+    // Функция для обработки отправки формы поста
+    document.getElementById("postForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      var photoInput = document.getElementById("postForm").elements["photo"];
+      var captionInput = document.getElementById("postForm").elements["caption"];
+
+      var photoFile = photoInput.files[0];
+      var caption = captionInput.value;
+
+      if (!photoFile || !caption) {
+        alert("Пожалуйста, выберите фото и введите текст поста.");
+        return;
+      }
+
+      var savedData = loadData();
+
+      var reader = new FileReader();
+      reader.onload = function() {
+        var photoUrl = reader.result;
+
+        var newPost = {
+          id: generateId(),
+          photo: photoUrl,
+          caption: caption,
+          comments: []
+        };
+        savedData.push(newPost);
+        saveData(savedData);
+
+        photoInput.value = "";
+        captionInput.value = "";
+
+        displayData();
+      };
+      reader.readAsDataURL(photoFile);
+    });
+
+    displayData();
+  </script>
+</body>
+</html>
